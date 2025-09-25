@@ -1,0 +1,84 @@
+name: Deploy to Development
+
+on:
+  push:
+    branches: [ develop ]
+
+env:
+  NODE_VERSION: '20'
+  PNPM_VERSION: '8'
+  AWS_REGION: 'us-east-1'
+  STAGE: 'development'
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: development
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Get pnpm store directory
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+
+      - name: Setup pnpm cache
+        uses: actions/cache@v3
+        with:
+          path: ${{ env.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build packages
+        run: pnpm run build
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          role-session-name: github-actions-deploy-dev
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Install AWS CDK CLI
+        run: npm install -g aws-cdk@latest
+
+      - name: CDK Bootstrap (if needed)
+        working-directory: packages/infrastructure
+        run: |
+          if ! cdk bootstrap --context stage=${{ env.STAGE }} 2>/dev/null; then
+            echo "Bootstrap already exists or failed, continuing..."
+          fi
+
+      - name: CDK Diff
+        working-directory: packages/infrastructure
+        run: cdk diff --context stage=${{ env.STAGE }}
+
+      - name: CDK Deploy
+        working-directory: packages/infrastructure
+        run: cdk deploy --all --require-approval=never --context stage=${{ env.STAGE }}
+
+      - name: Run post-deployment tests
+        run: pnpm run test:e2e
+        env:
+          API_ENDPOINT: ${{ steps.deploy.outputs.api_endpoint }}
+          TEST_ENVIRONMENT: development

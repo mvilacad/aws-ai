@@ -1,0 +1,33 @@
+{
+  "name": "@aws-ai/functions",
+  "version": "1.0.0",
+  "description": "AWS Lambda functions for AWS AI project",
+  "main": "./src/index.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "vitest",
+    "test:watch": "vitest --watch",
+    "lint": "eslint src --ext .ts",
+    "lint:fix": "eslint src --ext .ts --fix",
+    "type-check": "tsc --noEmit",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@aws-sdk/client-bedrock-runtime": "^3.896.0",
+    "@aws-sdk/client-dynamodb": "^3.896.0",
+    "@aws-sdk/lib-dynamodb": "^3.896.0",
+    "@aws-sdk/client-s3": "^3.896.0",
+    "@opensearch-project/opensearch": "^3.5.1",
+    "@aws-sdk/credential-providers": "^3.896.0",
+    "aws-lambda": "^1.0.7",
+    "@aws-ai/shared": "workspace:*",
+    "@aws-ai/database": "workspace:*",
+    "zod": "^4.1.11"
+  },
+  "devDependencies": {
+    "@types/aws-lambda": "^8.10.152",
+    "@types/node": "^24.5.2",
+    "typescript": "^5.9.2",
+    "vitest": "^3.2.4"
+  }
+}

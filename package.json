@@ -1,0 +1,50 @@
+{
+  "name": "aws-ai",
+  "version": "1.0.0",
+  "description": "AI-powered violation analysis system using AWS Bedrock",
+  "private": true,
+  "packageManager": "pnpm@10.17.1",
+  "engines": {
+    "node": ">=18.0.0",
+    "pnpm": ">=8.0.0"
+  },
+  "scripts": {
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "test": "turbo run test",
+    "test:watch": "turbo run test:watch",
+    "lint": "turbo run lint",
+    "lint:fix": "turbo run lint:fix",
+    "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\"",
+    "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,md}\"",
+    "type-check": "turbo run type-check",
+    "clean": "turbo run clean",
+    "deploy:dev": "turbo run deploy --filter=infrastructure",
+    "deploy:prod": "turbo run deploy:prod --filter=infrastructure",
+    "setup": "./scripts/setup.sh",
+    "seed-data": "tsx scripts/seed-data.ts"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^19.8.1",
+    "@commitlint/config-conventional": "^19.8.1",
+    "@eslint/js": "^9.36.0",
+    "@types/node": "^24.5.2",
+    "@typescript-eslint/eslint-plugin": "^8.44.1",
+    "@typescript-eslint/parser": "^8.44.1",
+    "eslint": "^9.36.0",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-import": "^2.32.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.2.0",
+    "prettier": "^3.6.2",
+    "tsx": "^4.20.5",
+    "turbo": "^2.5.8",
+    "typescript": "^5.9.2",
+    "typescript-eslint": "^8.44.1",
+    "vitest": "^3.2.4"
+  },
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ]
+}

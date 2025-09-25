@@ -1,0 +1,34 @@
+{
+  "name": "@aws-ai/infrastructure",
+  "version": "1.0.0",
+  "description": "AWS CDK infrastructure for AWS AI project",
+  "main": "./lib/index.js",
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc -w",
+    "test": "vitest",
+    "test:watch": "vitest --watch",
+    "lint": "eslint lib --ext .ts",
+    "lint:fix": "eslint lib --ext .ts --fix",
+    "type-check": "tsc --noEmit",
+    "clean": "rm -rf cdk.out dist",
+    "deploy": "cdk deploy --all --require-approval=never",
+    "deploy:prod": "cdk deploy --all --require-approval=broadening --context stage=production",
+    "diff": "cdk diff",
+    "synth": "cdk synth",
+    "destroy": "cdk destroy --all"
+  },
+  "dependencies": {
+    "aws-cdk-lib": "^2.216.0",
+    "@aws-cdk/aws-lambda-python-alpha": "^2.216.0-alpha.0",
+    "constructs": "^10.4.2",
+    "@aws-ai/shared": "workspace:*",
+    "@aws-ai/database": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^24.5.2",
+    "aws-cdk": "^2.1029.3",
+    "typescript": "^5.9.2",
+    "vitest": "^3.2.4"
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "name": "@aws-ai/database",
+  "version": "1.0.0",
+  "description": "Database schemas and seeders for AWS AI project",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "vitest",
+    "test:watch": "vitest --watch",
+    "lint": "eslint src --ext .ts",
+    "lint:fix": "eslint src --ext .ts --fix",
+    "type-check": "tsc --noEmit",
+    "clean": "rm -rf dist",
+    "seed": "tsx src/seeders/index.ts"
+  },
+  "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.896.0",
+    "@aws-sdk/lib-dynamodb": "^3.896.0",
+    "@opensearch-project/opensearch": "^3.5.1",
+    "@aws-ai/shared": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^24.5.2",
+    "tsx": "^4.20.5",
+    "typescript": "^5.9.2",
+    "vitest": "^3.2.4"
+  }
+}

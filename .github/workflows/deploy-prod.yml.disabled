@@ -1,0 +1,123 @@
+name: Deploy to Production
+
+on:
+  push:
+    branches: [ main ]
+  release:
+    types: [ published ]
+
+env:
+  NODE_VERSION: '20'
+  PNPM_VERSION: '8'
+  AWS_REGION: 'us-east-1'
+  STAGE: 'production'
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  pre-deploy-checks:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run full test suite
+        run: pnpm run test
+
+      - name: Security audit
+        run: pnpm audit --audit-level high
+
+      - name: Build all packages
+        run: pnpm run build
+
+      - name: Type check all packages
+        run: pnpm run type-check
+
+  deploy:
+    runs-on: ubuntu-latest
+    environment: production
+    needs: pre-deploy-checks
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build packages
+        run: pnpm run build
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          role-session-name: github-actions-deploy-prod
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Install AWS CDK CLI
+        run: npm install -g aws-cdk@latest
+
+      - name: CDK Diff
+        working-directory: packages/infrastructure
+        run: cdk diff --context stage=${{ env.STAGE }}
+
+      - name: CDK Deploy with approval
+        working-directory: packages/infrastructure
+        run: cdk deploy --all --require-approval=broadening --context stage=${{ env.STAGE }}
+
+      - name: Verify deployment
+        run: |
+          echo "Running deployment verification..."
+          # Add health check commands here
+          curl -f ${{ steps.deploy.outputs.health_endpoint }} || exit 1
+
+      - name: Run smoke tests
+        run: pnpm run test:smoke
+        env:
+          API_ENDPOINT: ${{ steps.deploy.outputs.api_endpoint }}
+          TEST_ENVIRONMENT: production
+
+  notify:
+    runs-on: ubuntu-latest
+    needs: [pre-deploy-checks, deploy]
+    if: always()
+
+    steps:
+      - name: Notify deployment status
+        uses: 8398a7/action-slack@v3
+        if: always()
+        with:
+          status: ${{ job.status }}
+          webhook_url: ${{ secrets.SLACK_WEBHOOK }}
+          fields: repo,message,commit,author,action,eventName,ref,workflow
+          text: |
+            Production deployment ${{ job.status }}!
+            Commit: ${{ github.sha }}
+            Branch: ${{ github.ref_name }}
+            Author: ${{ github.actor }}
