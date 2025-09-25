@@ -1,13 +1,13 @@
-#!/usr/bin/env node
-import "source-map-support/register";
 import * as cdk from "aws-cdk-lib";
-import { DataStack } from "../lib/stacks/data-stack";
-// TODO: Implement these stacks
-// import { ComputeStack } from '../lib/stacks/compute-stack';
-// import { AIStack } from '../lib/stacks/ai-stack';
-// import { MonitoringStack } from '../lib/stacks/monitoring-stack';
-// import { FrontendStack } from '../lib/stacks/frontend-stack';
+import "source-map-support/register";
+
 import { getEnvironmentConfig } from "../lib/environments";
+import { AIStack } from "../lib/stacks/ai-stack";
+import { ComputeStack } from "../lib/stacks/compute-stack";
+import { DataStack } from "../lib/stacks/data-stack";
+import { MonitoringStack } from "../lib/stacks/monitoring-stack";
+// TODO: Implement frontend stack
+// import { FrontendStack } from '../lib/stacks/frontend-stack';
 
 const app = new cdk.App();
 
@@ -33,33 +33,37 @@ const dataStack = new DataStack(app, `AwsAiDataStack-${stage}`, {
 	config,
 });
 
-// TODO: Implement remaining stacks
 // AI/ML layer - Bedrock configurations and model access
-// const aiStack = new AIStack(app, `AwsAiMLStack-${stage}`, {
-//   env: config.env,
-//   stage,
-//   config,
-// });
+const aiStack = new AIStack(app, `AwsAiMLStack-${stage}`, {
+	env: config.env,
+	stage,
+	config,
+});
 
 // Compute layer - Lambda functions and API Gateway
-// const computeStack = new ComputeStack(app, `AwsAiComputeStack-${stage}`, {
-//   env: config.env,
-//   stage,
-//   config,
-//   dataStack,
-//   aiStack,
-// });
+const computeStack = new ComputeStack(app, `AwsAiComputeStack-${stage}`, {
+	env: config.env,
+	stage,
+	config,
+	dataStack,
+	aiStack,
+});
 
 // Monitoring layer - CloudWatch, X-Ray, alarms
-// const monitoringStack = new MonitoringStack(app, `AwsAiMonitoringStack-${stage}`, {
-//   env: config.env,
-//   stage,
-//   config,
-//   computeStack,
-//   dataStack,
-// });
+const monitoringStack = new MonitoringStack(
+	app,
+	`AwsAiMonitoringStack-${stage}`,
+	{
+		env: config.env,
+		stage,
+		config,
+		computeStack,
+		dataStack,
+	},
+);
 
 // Frontend hosting (only for development and staging)
+// TODO: Implement frontend stack
 // if (stage !== 'production') {
 //   new FrontendStack(app, `AwsAiFrontendStack-${stage}`, {
 //     env: config.env,
@@ -70,8 +74,8 @@ const dataStack = new DataStack(app, `AwsAiDataStack-${stage}`, {
 // }
 
 // Stack dependencies
-// computeStack.addDependency(dataStack);
-// computeStack.addDependency(aiStack);
-// monitoringStack.addDependency(computeStack);
+computeStack.addDependency(dataStack);
+computeStack.addDependency(aiStack);
+monitoringStack.addDependency(computeStack);
 
 app.synth();
