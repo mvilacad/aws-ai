@@ -1,5 +1,5 @@
 {
-  "name": "@aws-ai/infrastructure",
+  "name": "infrastructure",
   "version": "1.0.0",
   "description": "AWS CDK infrastructure for AWS AI project",
   "main": "./lib/index.js",

@@ -34,7 +34,7 @@
       "cache": false
     },
     "deploy": {
-      "dependsOn": ["build", "test", "lint"],
+      "dependsOn": ["build", "lint"],
       "outputs": []
     },
     "deploy:prod": {

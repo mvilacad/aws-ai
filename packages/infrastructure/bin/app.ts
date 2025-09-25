@@ -1,36 +1,36 @@
 #!/usr/bin/env node
-import 'source-map-support/register';
-import * as cdk from 'aws-cdk-lib';
-import { DataStack } from '../lib/stacks/data-stack';
+import "source-map-support/register";
+import * as cdk from "aws-cdk-lib";
+import { DataStack } from "../lib/stacks/data-stack";
 // TODO: Implement these stacks
 // import { ComputeStack } from '../lib/stacks/compute-stack';
 // import { AIStack } from '../lib/stacks/ai-stack';
 // import { MonitoringStack } from '../lib/stacks/monitoring-stack';
 // import { FrontendStack } from '../lib/stacks/frontend-stack';
-import { getEnvironmentConfig } from '../lib/environments';
+import { getEnvironmentConfig } from "../lib/environments";
 
 const app = new cdk.App();
 
-const stage = app.node.tryGetContext('stage') || 'development';
+const stage = app.node.tryGetContext("stage") || "development";
 const config = getEnvironmentConfig(stage);
 
 const tags = {
-  Project: 'aws-ai',
-  Environment: stage,
-  Owner: 'aws-ai-team',
-  CostCenter: 'engineering',
+	Project: "aws-ai",
+	Environment: stage,
+	Owner: "aws-ai-team",
+	CostCenter: "engineering",
 };
 
 // Add tags to all stacks
 Object.entries(tags).forEach(([key, value]) => {
-  cdk.Tags.of(app).add(key, value);
+	cdk.Tags.of(app).add(key, value);
 });
 
 // Data layer - DynamoDB tables, S3 buckets, OpenSearch
 const dataStack = new DataStack(app, `AwsAiDataStack-${stage}`, {
-  env: config.env,
-  stage,
-  config,
+	env: config.env,
+	stage,
+	config,
 });
 
 // TODO: Implement remaining stacks

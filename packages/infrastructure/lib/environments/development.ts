@@ -1,4 +1,4 @@
-import { EnvironmentConfig } from './index';
+import type { EnvironmentConfig } from './index';
 
 export const developmentConfig: EnvironmentConfig = {
   env: {
